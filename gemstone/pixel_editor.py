@@ -1,5 +1,5 @@
 import pygame
-from animation_manager import Animation
+from gemstone.animation_manager import Animation
 
 class PixelEditor:
     """
@@ -8,7 +8,7 @@ class PixelEditor:
 
     def __init__(self, screen):
         self.screen = screen  # main Pygame screen
-        self.canvas_size = (64, 64)  # default canvas (can be changed up to 256)
+        self.canvas_size = (128, 128)  # default canvas (can be changed up to 256)
         # Initialize animation model with one empty frame
         self.animation = Animation(self.canvas_size)
         initial_frame = pygame.Surface(self.canvas_size, flags=pygame.SRCALPHA)
