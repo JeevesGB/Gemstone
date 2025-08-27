@@ -1,127 +1,170 @@
-import pygame
-import json
 import os
+import json
+import pygame
+from typing import List, Dict, Optional, Tuple
+
+class Frame:
+    def __init__(self, surface: pygame.Surface, duration: int = 100, pivot: Tuple[int,int]=(0,0)):
+        """
+        duration in milliseconds
+        pivot is optional anchor point
+        """
+        self.surface = surface
+        self.duration = duration
+        self.pivot = pivot
 
 class Animation:
-    """
-    Manages a list of frames (pygame.Surface) for frame-by-frame animation.
-    """
+    def __init__(self, name: str, loop: bool = True):
+        self.name = name
+        self.frames: List[Frame] = []
+        self.loop = loop
 
-    def __init__(self, canvas_size=(32, 32)):
-        self.canvas_size = canvas_size  # (width, height)
-        self.frames = []
-        self.current_index = 0
-        self.fps = 12  # default playback speed
-        self.onion_skin = False  # flag for onion skin preview
-
-    def new_frame(self, copy_current=False):
-        """
-        Add a new frame after the current one. If copy_current is True,
-        duplicate the current frame's content; otherwise create a blank frame.
-        """
-        if copy_current and self.frames:
-            # Duplicate current frame
-            new_surface = self.frames[self.current_index].copy()
+    def add_frame(self, frame: Frame, index: Optional[int] = None):
+        if index is None:
+            self.frames.append(frame)
         else:
-            # Create blank transparent frame
-            new_surface = pygame.Surface(self.canvas_size, flags=pygame.SRCALPHA)
-            new_surface.fill((0, 0, 0, 0))
-        insert_pos = self.current_index + 1
-        self.frames.insert(insert_pos, new_surface)
-        self.current_index = insert_pos
+            self.frames.insert(index, frame)
 
-    def remove_frame(self):
-        """Remove the current frame."""
-        if not self.frames:
+    def remove_frame(self, index: int):
+        if 0 <= index < len(self.frames):
+            del self.frames[index]
+
+    def duplicate_frame(self, index: int):
+        if 0 <= index < len(self.frames):
+            src = self.frames[index]
+            dup_surface = src.surface.copy()
+            dup = Frame(dup_surface, src.duration, src.pivot)
+            self.frames.insert(index+1, dup)
+
+class AnimationInstance:
+    """
+    Runtime controller for a single animated entity.
+    Keeps playback state: current frame index, elapsed time.
+    """
+    def __init__(self, animation: Animation):
+        self.animation = animation
+        self.current = 0
+        self.elapsed = 0
+        self.playing = True
+
+    def reset(self):
+        self.current = 0
+        self.elapsed = 0
+        self.playing = True
+
+    def set_animation(self, animation: Animation):
+        self.animation = animation
+        self.reset()
+
+    def update(self, dt_ms: int):
+        if not self.playing or not self.animation.frames:
             return
-        del self.frames[self.current_index]
-        # Adjust current index if needed
-        if self.current_index >= len(self.frames):
-            self.current_index = max(0, len(self.frames) - 1)
+        self.elapsed += dt_ms
+        while self.elapsed >= self.animation.frames[self.current].duration:
+            self.elapsed -= self.animation.frames[self.current].duration
+            self.current += 1
+            if self.current >= len(self.animation.frames):
+                if self.animation.loop:
+                    self.current = 0
+                else:
+                    self.current = len(self.animation.frames) - 1
+                    self.playing = False
+                    break
 
-    def duplicate_frame(self):
-        """Duplicate the current frame (insert copy after current)."""
-        if not self.frames:
-            return
-        new_surface = self.frames[self.current_index].copy()
-        insert_pos = self.current_index + 1
-        self.frames.insert(insert_pos, new_surface)
-        self.current_index = insert_pos
+    def get_surface(self) -> Optional[pygame.Surface]:
+        if not self.animation.frames:
+            return None
+        return self.animation.frames[self.current].surface
 
-    def reorder_frame(self, old_index, new_index):
-        """
-        Move a frame from old_index to new_index in the list.
-        Adjust current_index accordingly.
-        """
-        n = len(self.frames)
-        if 0 <= old_index < n and 0 <= new_index < n and old_index != new_index:
-            frame = self.frames.pop(old_index)
-            self.frames.insert(new_index, frame)
-            # Update current index if needed
-            if self.current_index == old_index:
-                self.current_index = new_index
-            elif old_index < self.current_index <= new_index:
-                self.current_index -= 1
-            elif new_index <= self.current_index < old_index:
-                self.current_index += 1
+class AnimationManager:
+    def __init__(self):
+        self.animations: Dict[str, Animation] = {}
 
-    def export_sprite_sheet(self, filename):
-        """
-        Combine all frames into one horizontal sprite sheet and save as PNG.
-        All frames must be same size (self.canvas_size).
-        """
-        if not self.frames:
-            return
-        w, h = self.canvas_size
-        sheet_width = w * len(self.frames)
-        sheet = pygame.Surface((sheet_width, h), flags=pygame.SRCALPHA)
-        # Blit each frame side-by-side
-        for i, frame in enumerate(self.frames):
-            sheet.blit(frame, (i * w, 0))
-        # Save the sprite sheet image
-        pygame.image.save(sheet, filename)
+    def register(self, animation: Animation):
+        self.animations[animation.name] = animation
 
-    def save_to_file(self, filename):
+    def get(self, name: str) -> Optional[Animation]:
+        return self.animations.get(name)
+
+    def unregister(self, name: str):
+        if name in self.animations:
+            del self.animations[name]
+
+    # Serialization helpers
+    def save_animation_json(self, animation_name: str, out_json_path: str, spritesheet_path: Optional[str]=None):
         """
-        Save animation to a directory: PNG frames + animation.json.
-        filename is base name (e.g. "walk_cycle.anim"), without extension.
-        A folder is created containing frames and JSON.
+        Save animation metadata to JSON. If spritesheet_path is provided, this function assumes
+        the frames are arranged in a spritesheet and will record their rects. Otherwise frame
+        images are saved individually next to the json.
         """
-        base_name = os.path.splitext(filename)[0]
-        folder = base_name
-        os.makedirs(folder, exist_ok=True)
+        anim = self.get(animation_name)
+        if not anim:
+            raise ValueError("Unknown animation: " + animation_name)
+
         data = {
-            "canvas_size": list(self.canvas_size),
-            "fps": self.fps,
+            "name": anim.name,
+            "loop": anim.loop,
             "frames": []
         }
-        for i, frame in enumerate(self.frames):
-            frame_filename = f"frame_{i}.png"
-            path = os.path.join(folder, frame_filename)
-            pygame.image.save(frame, path)
-            data["frames"].append(frame_filename)
-        # Write JSON metadata
-        json_path = os.path.join(folder, "animation.json")
-        with open(json_path, "w") as f:
-            json.dump(data, f, indent=4)
 
-    def load_from_file(self, filename):
-        """
-        Load animation from a directory containing animation.json and frame PNGs.
-        """
-        base_name = os.path.splitext(filename)[0]
-        folder = base_name
-        json_path = os.path.join(folder, "animation.json")
-        if not os.path.exists(json_path):
-            return  # no animation file
-        with open(json_path, "r") as f:
-            data = json.load(f)
-        self.canvas_size = tuple(data.get("canvas_size", self.canvas_size))
-        self.fps = data.get("fps", self.fps)
-        self.frames = []
-        for frame_filename in data.get("frames", []):
-            path = os.path.join(folder, frame_filename)
-            if os.path.exists(path):
-                image = pygame.image.load(path).convert_alpha()
-                self.frames.append(image)
-        self.current_index = 0
+        base_dir = os.path.dirname(out_json_path)
+        os.makedirs(base_dir, exist_ok=True)
+
+        # If a spritesheet was provided, reference it and write rects. Otherwise save each frame as png.
+        if spritesheet_path:
+            data["spritesheet"] = os.path.basename(spritesheet_path)
+            # This function doesn't pack a spritesheet automatically. Use editor's packer for that.
+            for i, f in enumerate(anim.frames):
+                data["frames"].append({
+                    "index": i,
+                    "duration": f.duration,
+                    "pivot": f.pivot
+                })
+        else:
+            # Save frame PNGs next to JSON
+            for i, f in enumerate(anim.frames):
+                fname = f"{anim.name}_frame_{i}.png"
+                full = os.path.join(base_dir, fname)
+                pygame.image.save(f.surface, full)
+                data["frames"].append({
+                    "file": fname,
+                    "duration": f.duration,
+                    "pivot": f.pivot
+                })
+
+        with open(out_json_path, "w", encoding="utf-8") as fh:
+            json.dump(data, fh, indent=2)
+
+    def load_animation_json(self, json_path: str, base_path: Optional[str] = None) -> Animation:
+        """Load an animation JSON created by save_animation_json."""
+        base = base_path or os.path.dirname(json_path)
+        with open(json_path, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+
+        anim = Animation(data.get("name", "anim"), data.get("loop", True))
+        frames = data.get("frames", [])
+
+        spritesheet = None
+        if "spritesheet" in data:
+            spritesheet = pygame.image.load(os.path.join(base, data["spritesheet"])).convert_alpha()
+
+        for fr in frames:
+            if spritesheet and "rect" in fr:
+                # rect: [x,y,w,h]
+                x, y, w, h = fr["rect"]
+                surf = pygame.Surface((w, h), pygame.SRCALPHA)
+                surf.blit(spritesheet, (0, 0), (x, y, w, h))
+                duration = fr.get("duration", 100)
+                pivot = tuple(fr.get("pivot", (0, 0)))
+                anim.add_frame(Frame(surf, duration, pivot))
+            elif "file" in fr:
+                surf = pygame.image.load(os.path.join(base, fr["file"])).convert_alpha()
+                duration = fr.get("duration", 100)
+                pivot = tuple(fr.get("pivot", (0, 0)))
+                anim.add_frame(Frame(surf, duration, pivot))
+            else:
+                # fallback: skip
+                continue
+
+        self.register(anim)
+        return anim

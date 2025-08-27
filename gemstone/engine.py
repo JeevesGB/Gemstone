@@ -13,6 +13,14 @@ class GameEngine:
         self._current = None
         self.dt = 0
 
+    
+    def change_scene(self, name: str):
+        if name in self.scenes:
+            self._current = self._scenes[name]
+            if hasattr(self._current, "on_enter"):
+                self._current.on_enter()
+
+
     def add_scene(self, name, scene):
         scene.engine = self
         self.scenes[name] = scene
