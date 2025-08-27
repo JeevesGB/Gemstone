@@ -8,6 +8,7 @@ class PixelEditor:
 
     def __init__(self, screen):
         self.screen = screen  # main Pygame screen
+        self.surface = pygame.display.set_mode((512, 512), pygame.RESIZABLE)
         self.canvas_size = (128, 128)  # default canvas (can be changed up to 256)
         # Initialize animation model with one empty frame
         self.animation = Animation(self.canvas_size)

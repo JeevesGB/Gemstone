@@ -10,8 +10,9 @@ class AnimationEditorScene:
         self.frame_rate = 6
         self.playing = False
         self.last_update = 0
+    
 
-        self.surface = pygame.display.set_mode((512, 512))
+        self.surface = pygame.display.set_mode((512, 512), pygame.RESIZABLE)
         pygame.display.set_caption("Gemstone Animation Editor")
 
         # start with one blank frame
