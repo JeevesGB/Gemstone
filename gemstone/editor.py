@@ -20,6 +20,12 @@ PALETTE = [
 class EditorScene(Scene):
     def __init__(self):
         super().__init__()
+        self.window_size = (800, 600)
+        # Get actual window size from engine if available
+        if hasattr(self.engine, 'window_size'):
+            self.window_size = self.engine.window_size
+        
+        self.ui_panel_width = 250
         self.zoom_levels = [8, 12, 16, 20]  # pixel size
         self.zoom_index = 0
         self.show_grid = True
@@ -54,20 +60,33 @@ class EditorScene(Scene):
         px = self.zoom_levels[self.zoom_index]
         self.canvas_rect.width = self.canvas_w * px
         self.canvas_rect.height = self.canvas_h * px
-        # Keep top-left anchored
-        self.canvas_rect.topleft = (20, 60)
+        
+        # Center canvas in the available space (left of UI panel)
+        canvas_area_width = self.window_size[0] - self.ui_panel_width
+        canvas_center_x = canvas_area_width // 2
+        canvas_center_y = self.window_size[1] // 2
+        
+        # Position canvas centered in left area
+        self.canvas_rect.centerx = canvas_center_x
+        self.canvas_rect.centery = canvas_center_y
+        
+        # Ensure canvas doesn't go off-screen
+        if self.canvas_rect.left < 20:
+            self.canvas_rect.left = 20
+        if self.canvas_rect.top < 100:  # Leave room for header text
+            self.canvas_rect.top = 100
 
-        # Palette layout
+        # Palette layout - positioned relative to window width
         self.palette_rects = []
-        start_x = self.canvas_rect.right + 20
-        start_y = 60
+        start_x = self.window_size[0] - self.ui_panel_width + 20  # Dynamic positioning
+        start_y = 90
         box = 28
         pad = 6
         for i, col in enumerate(PALETTE):
             r = pygame.Rect(start_x + (i%4)*(box+pad), start_y + (i//4)*(box+pad), box, box)
             self.palette_rects.append((r, col))
 
-        # Buttons
+        # Buttons - positioned relative to window width
         bx = start_x
         by = start_y + 5*(box+pad) + 10
         bw, bh, gap = 120, 30, 8
@@ -95,7 +114,15 @@ class EditorScene(Scene):
         mods = pygame.key.get_mods()
         ctrl = mods & pygame.KMOD_CTRL
 
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.VIDEORESIZE:
+            # Set minimum size to prevent UI overlap
+            min_width = 600
+            min_height = 400
+            self.window_size = (max(min_width, event.w), max(min_height, event.h))
+            # Trigger layout recalculation
+            self.compute_layout()
+
+        elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 # back to game demo if exists
                 self.engine.set_scene("demo", surface_from_grid(self.grid))
@@ -180,7 +207,7 @@ class EditorScene(Scene):
             self.zoom_index = (self.zoom_index + 1) % len(self.zoom_levels)
             self.compute_layout()
         elif key == "grid":
-            self.show_grid = not self.show_grid()
+            self.show_grid = not self.show_grid
 
     # ---- Paint ops ----
     def screen_to_grid(self, pos):
@@ -287,7 +314,8 @@ class EditorScene(Scene):
         for rect, col in self.palette_rects:
             pygame.draw.rect(surface, col, rect)
             pygame.draw.rect(surface, (230,230,230), rect, 2)
-        draw_text(surface, "Palette", (self.palette_rects[0][0].x, self.palette_rects[0][0].y - 22))
+        if self.palette_rects:  # Only draw label if palette exists
+            draw_text(surface, "Palette", (self.palette_rects[0][0].x, self.palette_rects[0][0].y - 22))
 
         # Buttons
         for key, (rect, label) in self.buttons.items():
@@ -295,11 +323,10 @@ class EditorScene(Scene):
             pygame.draw.rect(surface, (120,120,120), rect, 1, border_radius=6)
             draw_text(surface, label, (rect.x+8, rect.y+6))
 
-        # Current color preview
-        cx = self.canvas_rect.right + 20
-        cy = self.canvas_rect.bottom - 64
+        # Current color preview - positioned relative to window
+        cx = self.window_size[0] - self.ui_panel_width + 20
+        cy = self.window_size[1] - 90  # 90px from bottom
         swatch = pygame.Rect(cx, cy, 64, 64)
         pygame.draw.rect(surface, self.primary, swatch)
         pygame.draw.rect(surface, (230,230,230), swatch, 2)
         draw_text(surface, "Current", (cx, cy - 20))
-
