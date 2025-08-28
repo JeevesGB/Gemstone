@@ -16,7 +16,7 @@ class GameEngine:
     
     def change_scene(self, name: str):
         if name in self.scenes:
-            self._current = self._scenes[name]
+            self._current = self.scenes[name]
             if hasattr(self._current, "on_enter"):
                 self._current.on_enter()
 

@@ -59,10 +59,11 @@ class PixelEditor:
                     frame = self.animation.frames[self.animation.current_index]
                     frame.set_at((x, y), self.current_color)
 
-    def draw(self):
+    def draw(self, screen=None):
         """
         Draw the editor UI: canvas, thumbnails, preview, and buttons.
         """
+        target_screen = screen if screen is not None else self.screen
         # 1. Draw current frame canvas
         canvas_surface = self.animation.frames[self.animation.current_index]
         # Blit the canvas onto the screen (it is already a Surface)

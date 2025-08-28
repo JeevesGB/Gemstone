@@ -4,7 +4,7 @@ from gemstone.engine import Scene
 class MainMenu(Scene):
     def __init__(self):
         super().__init__()
-        self.options = ["Editor", "Demo", "Animation Editor", "Quit"]
+        self.options = ["Editor", "Demo", "Animation Editor", "Pixel Editor", "Quit"]
         self.selected = 0
         self.font = pygame.font.SysFont("Arial", 32)
 
@@ -25,6 +25,8 @@ class MainMenu(Scene):
             self.engine.change_scene("demo")
         elif option == "Animation Editor":
             self.engine.change_scene("anim")
+        elif option == "Pixel Editor":
+            self.engine.change_scene("pixel_editor")
         elif option == "Quit":
             self.engine.quit()
 
@@ -34,7 +36,7 @@ class MainMenu(Scene):
     def draw(self, screen: pygame.Surface):
         screen.fill((30, 30, 30))
         for i, option in enumerate(self.options):
-            color = (255, 255, 0) if i == self.selected else (200, 200, 200)
+            color = (225, 254, 0) if i == self.selected else (200, 200, 200)
             text = self.font.render(option, True, color)
             screen.blit(text, (100, 100 + i * 50))
 
