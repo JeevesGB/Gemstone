@@ -18,7 +18,6 @@ def main():
         elif current_scene == "editor":
             editor = SpriteEditor(screen)
             next_scene = editor.run()
-            # The editor returns "menu" or "quit"
             current_scene = next_scene
         elif current_scene == "quit":
             running = False
