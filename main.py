@@ -1,14 +1,27 @@
 import pygame
 from menu import Menu
-
+from gemstone.sprite_creator import SpriteEditor
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Gemstone")
 
-    menu = Menu(screen)
-    menu.run()
+    running = True
+    current_scene = "menu"
+
+    while running:
+        if current_scene == "menu":
+            menu = Menu(screen)
+            next_scene = menu.run()
+            current_scene = next_scene
+        elif current_scene == "editor":
+            editor = SpriteEditor(screen)
+            next_scene = editor.run()
+            # The editor returns "menu" or "quit"
+            current_scene = next_scene
+        elif current_scene == "quit":
+            running = False
 
     pygame.quit()
 
