@@ -56,6 +56,8 @@ class Menu:
     def activate_button(self, button):
         if button["text"] == "Sprite Editor":
             return "editor"
+    #    elif button["text"] == "DAW - alpha 0.00":
+    #        return "daw"
         elif button["text"] == "Quit":
             return "quit"
         return "menu"
