@@ -7,8 +7,9 @@
 # Run This 
 
 import pygame
-from menu import Menu
+from gemstone.menu import Menu
 from gemstone.sprite_creator import SpriteEditor
+from gemstone.daw import Sequencer, PianoRoll
 
 def main():
     pygame.init()
