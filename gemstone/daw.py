@@ -1,17 +1,16 @@
 import sys 
 import time 
 import tempfile 
+import mido 
+import PyQt6
 from pathlib import Path 
 from dataclasses import dataclass 
-
 from PyQt6.QtWidgets import ( QApplication, QWidget, QHBoxLayout, QVBoxLayout, QGridLayout, 
                              QApplication, QWidget, QVBoxLayout, QGridLayout,
                               QPushButton, QLabel, QSpinBox, QSlider, QFileDialog, QMessageBox )
-
 from PyQt6.QtCore import Qt, QTimer 
 from PyQt6.QtGui import QColor, QPalette 
 
-import mido 
 
 # ---
 # Sequencer data model 

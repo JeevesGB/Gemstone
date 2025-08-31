@@ -8,6 +8,7 @@ class Menu:
 
         self.buttons = [
             {"text": "Sprite Editor", "rect": pygame.Rect(300, 200, 200, 60)},
+            {"text": "DAW - alpha 0.00", rect: pygame.Rect(250, 150, 30)},
             {"text": "Quit", "rect": pygame.Rect(300, 300, 200, 60)},
         ]
         self.selected_index = 0
