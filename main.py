@@ -13,7 +13,7 @@ from gemstone.daw import Sequencer, PianoRoll
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((800, 600))
+    screen = pygame.display.set_mode((1900, 720))
     pygame.display.set_caption("Gemstone")
 
     running = True

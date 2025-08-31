@@ -7,9 +7,9 @@ class Menu:
         self.font = pygame.font.SysFont("arial", 40)
 
         self.buttons = [
-            {"text": "Sprite Editor", "rect": pygame.Rect(300, 200, 200, 60)},
-            {"text": "DAW - alpha 0.00", rect: pygame.Rect(250, 150, 30)},
-            {"text": "Quit", "rect": pygame.Rect(300, 300, 200, 60)},
+            {"text": "Sprite Editor", "rect": pygame.Rect(300, 100, 200, 60)},
+            {"text": "DAW - alpha 0.00", "rect": pygame.Rect(100, 200, 150, 60)},
+            {"text": "Quit", "rect": pygame.Rect(600, 200, 200, 60)},
         ]
         self.selected_index = 0
 
