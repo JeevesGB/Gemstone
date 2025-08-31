@@ -1,3 +1,11 @@
+#---
+#
+#   Project Gemstone Version 0.001 
+#
+#---
+
+# Run This 
+
 import pygame
 from menu import Menu
 from gemstone.sprite_creator import SpriteEditor
