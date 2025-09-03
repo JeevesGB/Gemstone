@@ -23,3 +23,7 @@ python main.py
 
 ## Notes
 - More features *TBC* 
+
+
+## Credits 
+- JEJ 
