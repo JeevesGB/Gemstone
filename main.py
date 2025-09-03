@@ -1,10 +1,19 @@
+#---
+#
+#   Project Gemstone Version 0.001 
+#
+#---
+
+# Run This 
+
 import pygame
-from menu import Menu
+from gemstone.menu import Menu
 from gemstone.sprite_creator import SpriteEditor
+from gemstone.daw import Config
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((800, 600))
+    screen = pygame.display.set_mode((1920, 1080))
     pygame.display.set_caption("Gemstone")
 
     running = True
@@ -19,6 +28,11 @@ def main():
             editor = SpriteEditor(screen)
             next_scene = editor.run()
             current_scene = next_scene
+    #    elif current_scene == "daw":
+    #        menu = Config(screen)
+    #        next_scene = editor.run()
+    #        current_scene = next_scene
+            
         elif current_scene == "quit":
             running = False
 

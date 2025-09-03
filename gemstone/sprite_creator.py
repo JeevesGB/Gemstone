@@ -15,8 +15,8 @@ class SpriteEditor:
         self.canvas_height = grid_size * cell_size
         
         # UI layout constants
-        self.UI_WIDTH = 180
-        self.MARGIN = 20
+        self.UI_WIDTH = 500
+        self.MARGIN = 50
         
         # Position canvas to leave room for UI on the right
         self.canvas_rect = pygame.Rect(self.MARGIN, self.MARGIN, 
@@ -272,6 +272,28 @@ class SpriteEditor:
                 pygame.draw.rect(self.screen, self.grid[row][col], rect)
                 # Light grid lines
                 pygame.draw.rect(self.screen, (230, 230, 230), rect, 1)
+
+    def update_layout(self):
+        sw, sh = self.screen.get_size()
+
+    # Keep canvas square and centered vertically
+        max_canvas_size = min(sw // 2, sh - 2 * self.MARGIN)
+        self.cell_size = max_canvas_size // self.grid_size
+        self.canvas_width = self.canvas_height = self.cell_size * self.grid_size
+        self.canvas_rect = pygame.Rect(
+            self.MARGIN,
+            (sh - self.canvas_height) // 2,  # center vertically
+            self.canvas_width,
+            self.canvas_height
+        )
+
+    # UI starts to the right of canvas
+        self.ui_start_x = self.canvas_rect.right + self.MARGIN
+        self.ui_rect = pygame.Rect(self.ui_start_x, self.MARGIN,
+                                   sw - self.ui_start_x - self.MARGIN,
+                                   sh - 2 * self.MARGIN)
+
+        
 
     def draw_filename_input(self):
         # Center the input dialog

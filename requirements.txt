@@ -1,3 +1,10 @@
 pygame>=2.5.0
+<<<<<<< HEAD
 PyQt6
 mido
+=======
+mido
+PyQt6
+pygame
+matplotlib
+>>>>>>> e7e60b7f4d47b7080a5a4d4bed82417ded99ceb0
