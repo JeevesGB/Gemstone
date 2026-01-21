@@ -1,13 +1,16 @@
 from PyQt6.QtWidgets import (
-    QMainWindow, QWidget, QHBoxLayout, QSplitter
+    QMainWindow,
+    QWidget,
+    QHBoxLayout,
+    QSplitter
 )
 from PyQt6.QtCore import Qt
 
-from editor.viewports.perspective_view import PerspectiveView
-from editor.viewports.ortho_view import OrthoView
 from editor.ui.menus import build_menus
 from editor.ui.toolbars import build_toolbars
 from editor.ui.docks import build_docks
+from editor.viewports.perspective_view import PerspectiveView
+from editor.viewports.ortho_view import OrthoView
 
 
 class EditorMainWindow(QMainWindow):
@@ -27,22 +30,24 @@ class EditorMainWindow(QMainWindow):
         central = QWidget()
         self.setCentralWidget(central)
 
-        splitter = QSplitter(Qt.Orientation.Horizontal)
+        main_split = QSplitter(Qt.Orientation.Horizontal)
 
-        self.view3d = PerspectiveView()
-        splitter.addWidget(self.view3d)
+        # Left: 3D view
+        self.view_3d = PerspectiveView()
+        main_split.addWidget(self.view_3d)
 
+        # Right: stacked ortho views
         ortho_split = QSplitter(Qt.Orientation.Vertical)
-        self.view_top = OrthoView("top")
-        self.view_side = OrthoView("side")
+        self.view_top = OrthoView("Top")
+        self.view_side = OrthoView("Side")
 
         ortho_split.addWidget(self.view_top)
         ortho_split.addWidget(self.view_side)
 
-        splitter.addWidget(ortho_split)
+        main_split.addWidget(ortho_split)
 
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(splitter)
+        layout.addWidget(main_split)
 
         central.setLayout(layout)

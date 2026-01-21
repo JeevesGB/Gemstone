@@ -11,13 +11,3 @@ class BaseView(QOpenGLWidget):
 
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
-class PerspectiveView(BaseView):
-    def initializeGL(self):
-        super().initializeGL()
-        glClearColor(0.15, 0.15, 0.18, 1.0)
-
-class OrthoView(BaseView):
-    def initializeGL(self):
-        super().initializeGL()
-        glClearColor(0.1, 0.1, 0.1, 1.0)
