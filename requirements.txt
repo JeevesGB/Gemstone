@@ -1,10 +1,7 @@
-pygame>=2.5.0
-<<<<<<< HEAD
+glfw
+PyOpenGL
 PyQt6
 mido
-=======
-mido
-PyQt6
-pygame
+numpy
 matplotlib
->>>>>>> e7e60b7f4d47b7080a5a4d4bed82417ded99ceb0
+sounddevice   

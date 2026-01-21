@@ -1,0 +1,56 @@
+gemstone/
+│
+├── engine/
+│   ├── core/
+│   │   ├── time.py
+│   │   ├── input.py
+│   │   └── scene.py
+│   │
+│   ├── math/
+│   │   ├── plane.py
+│   │   └── brush.py
+│   │
+│   ├── render/
+│   │   ├── gl_context.py
+│   │   ├── mesh_builder.py
+│   │   └── shaders/
+│   │
+│   ├── audio/
+│   │   └── mixer.py
+│   │
+│   └── assets/
+│       └── texture_loader.py
+│
+├── editor/
+│   ├── app.py                # Entry point for editor
+│   ├── main_window.py        # QMainWindow
+│   │
+│   ├── ui/
+│   │   ├── menus.py
+│   │   ├── toolbars.py
+│   │   └── docks.py
+│   │
+│   ├── viewports/
+│   │   ├── base_view.py
+│   │   ├── perspective_view.py
+│   │   └── ortho_view.py
+│   │
+│   ├── tools/
+│   │   ├── select_tool.py
+│   │   ├── brush_tool.py
+│   │   ├── face_tool.py
+│   │   └── entity_tool.py
+│   │
+│   ├── state/
+│   │   ├── editor_state.py
+│   │   └── selection.py
+│   │
+│   ├── assets/
+│   │   └── texture_browser.py
+│   │
+│   └── commands/
+│       ├── move_face.py
+│       ├── create_brush.py
+│       └── delete.py
+│
+└── run_editor.py
