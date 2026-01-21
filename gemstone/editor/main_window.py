@@ -32,22 +32,25 @@ class EditorMainWindow(QMainWindow):
 
         main_split = QSplitter(Qt.Orientation.Horizontal)
 
-        # Left: 3D view
+    # Left: 3D view
         self.view_3d = PerspectiveView()
         main_split.addWidget(self.view_3d)
 
-        # Right: stacked ortho views
+    # Right: ortho views (Top / Front / Side)
         ortho_split = QSplitter(Qt.Orientation.Vertical)
+
         self.view_top = OrthoView("Top")
+        self.view_front = OrthoView("Front")
         self.view_side = OrthoView("Side")
 
         ortho_split.addWidget(self.view_top)
+        ortho_split.addWidget(self.view_front)
         ortho_split.addWidget(self.view_side)
 
         main_split.addWidget(ortho_split)
-
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(main_split)
 
         central.setLayout(layout)
+
